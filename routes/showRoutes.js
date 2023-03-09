@@ -56,7 +56,7 @@ async (req, res) => {
     const errors = validationResult(req);
 
     if(!errors.isEmpty()){
-        res.json({errors: errors.array()});
+        return res.json({errors: errors.array()});
     }else{
         foundShow = await Show.findByPk(req.params.id,
         {include: User});
