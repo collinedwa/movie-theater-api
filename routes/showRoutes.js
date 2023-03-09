@@ -8,22 +8,27 @@ const showRoutes = express.Router();
 showRoutes.get("/", async (req, res) => {
     showList = await Show.findAll();
 
-    res.json(showList);
+    if (!showList[0]) return res.json({error: "shows not found"});
+
+    return res.json(showList);
 })
 
 showRoutes.get("/:id", async (req, res) => {
     foundShow = await Show.findByPk(req.params.id);
 
-    res.json(foundShow);
+    if (!foundShow) return res.json({error: "show not found"});
+
+    return res.json(foundShow);
 })
 
 showRoutes.get("/genres/:genre", async (req, res) => {
+    capitalizedGenre = req.params.genre.charAt(0).toUpperCase() + req.params.genre.slice(1);
     foundShow = await Show.findAll({where:{
-        genre: req.params.genre
+        genre: capitalizedGenre
     }})
-    resultString = `${req.params.genre} shows`
+    resultString = `${capitalizedGenre} shows`
 
-    res.json({[resultString]: foundShow});
+    return res.json({[resultString]: foundShow});
 })
 
 showRoutes.put("/:id/updates", 
@@ -32,14 +37,16 @@ async (req, res) => {
     const errors = validationResult(req);
 
     if(!errors.isEmpty()){
-        res.json({errors: errors.array()});
+        return res.json({errors: errors.array()});
     }else{
         foundShow = await Show.findByPk(req.params.id,
         {include: User});
 
+        if (!foundShow) return res.json({error: "show not found"});
+
         await foundShow.update(req.body);
     
-        res.json({["updated status"]: foundShow});
+        return res.json({["updated status"]: foundShow});
         }
 })
 
@@ -54,17 +61,22 @@ async (req, res) => {
         foundShow = await Show.findByPk(req.params.id,
         {include: User});
         
+        if (!foundShow) return res.json({error: "show not found"});
+
         await foundShow.update(req.body);
 
-        res.json({["updated rating"]: foundShow});
+        return res.json({["updated rating"]: foundShow});
     }
 })
 
 showRoutes.delete("/:id", async (req, res) => {
     foundShow = await Show.findByPk(req.params.id);
+
+    if (!foundShow) return res.json({error: "show not found"});
+    
     await foundShow.destroy();
 
-    res.json({deleted: foundShow});
+    return res.json({deleted: foundShow});
 })
 
 module.exports = showRoutes;
