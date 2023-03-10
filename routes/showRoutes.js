@@ -22,7 +22,9 @@ showRoutes.get("/:id", async (req, res) => {
 })
 
 showRoutes.get("/genres/:genre", async (req, res) => {
+    // allows for case-insensitive search
     capitalizedGenre = req.params.genre.charAt(0).toUpperCase() + req.params.genre.slice(1);
+    
     foundShow = await Show.findAll({where:{
         genre: capitalizedGenre
     }})
@@ -60,8 +62,11 @@ async (req, res) => {
     }else{
         foundShow = await Show.findByPk(req.params.id,
         {include: User});
-        
+
         if (!foundShow) return res.json({error: "show not found"});
+
+        // only allows rating changes if show has been watched by a user
+        if (!foundShow.users[0]) return res.json({error: "show has not been watched"});
 
         await foundShow.update(req.body);
 

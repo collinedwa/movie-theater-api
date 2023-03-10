@@ -35,6 +35,8 @@ userRoutes.get("/:id/shows", async (req, res) => {
 userRoutes.put("/:id/shows/:sid", async (req, res) => {
     foundUser = await User.findByPk(req.params.id, {
         include: Show});
+
+    // initialized to check if show exists before adding to user's list
     foundShow = await Show.findByPk(req.params.sid);
 
     if (!foundUser) return res.json({error: "user not found"});
